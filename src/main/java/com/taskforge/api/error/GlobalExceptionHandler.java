@@ -1,5 +1,6 @@
 package com.taskforge.api.error;
 
+import com.taskforge.project.exception.DuplicateProjectKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -35,6 +36,15 @@ public class GlobalExceptionHandler {
         return Map.of(
                 "error", "VALIDATION_ERROR",
                 "fields", errors
+        );
+    }
+
+    @ExceptionHandler(DuplicateProjectKeyException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public Map<String, Object> handleDuplicateKey(DuplicateProjectKeyException ex) {
+        return Map.of(
+                "error", "DUPLICATE_PROJECT_KEY",
+                "message", ex.getMessage()
         );
     }
 }

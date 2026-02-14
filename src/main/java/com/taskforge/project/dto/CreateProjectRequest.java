@@ -9,7 +9,7 @@ import lombok.Data;
 public class CreateProjectRequest {
 
     @NotBlank(message = "name is required")
-    @Size(min = 3, max = 10, message = "name must be 3 to 100 characters")
+    @Size(min = 3, max = 100, message = "name must be 3 to 100 characters")
     private String name;
 
     @NotBlank(message = "key is required")

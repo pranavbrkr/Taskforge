@@ -2,6 +2,7 @@ package com.taskforge.project.service;
 
 import com.taskforge.project.dto.CreateProjectRequest;
 import com.taskforge.project.dto.ProjectResponse;
+import com.taskforge.project.exception.DuplicateProjectKeyException;
 import com.taskforge.project.model.Project;
 import org.springframework.stereotype.Service;
 
@@ -15,8 +16,15 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ProjectService {
 //    thread-safe map since controllers/services are singletons
     private final Map<String, Project> store = new ConcurrentHashMap<>();
+    private final Map<String, String> keyToId = new ConcurrentHashMap<>();
 
     public ProjectResponse create(CreateProjectRequest request) {
+        String key = request.getKey();
+
+        if(keyToId.containsKey(key)) {
+            throw new DuplicateProjectKeyException(key);
+        }
+
         String id = UUID.randomUUID().toString();
 
         Project project = new Project(
@@ -26,6 +34,8 @@ public class ProjectService {
         );
 
         store.put(id, project);
+        keyToId.put(key, id);
+
         return toResponse(project);
     }
 
