@@ -7,7 +7,9 @@ import com.taskforge.project.exception.DuplicateProjectKeyException;
 import com.taskforge.project.model.Project;
 import com.taskforge.project.repo.JpaProjectRepository;
 import com.taskforge.project.repo.ProjectRepository;
+import com.taskforge.task.repo.TaskRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -19,9 +21,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ProjectService {
 
     private final JpaProjectRepository projectRepository;
+    private final TaskRepository taskRepository;
 
-    public ProjectService(JpaProjectRepository projectRepository) {
+    public ProjectService(JpaProjectRepository projectRepository, TaskRepository taskRepository) {
         this.projectRepository = projectRepository;
+        this.taskRepository = taskRepository;
     }
 
     public ProjectResponse create(CreateProjectRequest request) {
@@ -53,11 +57,14 @@ public class ProjectService {
                 .toList();
     }
 
+    @Transactional
     public void delete(String id) {
         boolean exists = projectRepository.existsById(id);
         if (!exists) {
             throw new NoSuchElementException("Project not found: " + id);
         }
+
+        taskRepository.deleteByProjectId(id);
         projectRepository.deleteById(id);
     }
 
