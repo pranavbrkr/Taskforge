@@ -1,6 +1,7 @@
 package com.taskforge.api.error;
 
 import com.taskforge.project.exception.DuplicateProjectKeyException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -45,6 +46,16 @@ public class GlobalExceptionHandler {
         return Map.of(
                 "error", "DUPLICATE_PROJECT_KEY",
                 "message", ex.getMessage()
+        );
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public Map<String, Object> handleDataIntegrity(DataIntegrityViolationException ex) {
+        String msg = ex.getMostSpecificCause() != null ? ex.getMostSpecificCause().getMessage() : ex.getMessage();
+        return Map.of(
+                "error", "DATA_INTEGRITY_VIOLATION",
+                "message", "Request violates a database constraint (likely duplicate key)."
         );
     }
 }
