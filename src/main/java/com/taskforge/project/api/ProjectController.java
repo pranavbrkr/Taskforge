@@ -2,6 +2,7 @@ package com.taskforge.project.api;
 
 import com.taskforge.project.dto.CreateProjectRequest;
 import com.taskforge.project.dto.ProjectResponse;
+import com.taskforge.project.dto.UpdateProjectRequest;
 import com.taskforge.project.service.ProjectService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,11 @@ public class ProjectController {
     @GetMapping
     public List<ProjectResponse> getAll() {
         return projectService.getAll();
+    }
+
+    @PatchMapping("/{id}")
+    public ProjectResponse update(@PathVariable String id, @Valid @RequestBody UpdateProjectRequest request) {
+        return projectService.update(id, request);
     }
 
     @DeleteMapping("/{id}")
