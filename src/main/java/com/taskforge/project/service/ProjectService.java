@@ -5,6 +5,7 @@ import com.taskforge.project.dto.ProjectResponse;
 import com.taskforge.project.dto.UpdateProjectRequest;
 import com.taskforge.project.exception.DuplicateProjectKeyException;
 import com.taskforge.project.model.Project;
+import com.taskforge.project.repo.ProjectRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,62 +16,58 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class ProjectService {
-//    thread-safe map since controllers/services are singletons
-    private final Map<String, Project> store = new ConcurrentHashMap<>();
-    private final Map<String, String> keyToId = new ConcurrentHashMap<>();
+
+    private final ProjectRepository projectRepository;
+
+    public ProjectService(ProjectRepository projectRepository) {
+        this.projectRepository = projectRepository;
+    }
 
     public ProjectResponse create(CreateProjectRequest request) {
         String key = request.getKey();
 
-        if(keyToId.containsKey(key)) {
+        if(projectRepository.findByKey(key).isPresent()) {
             throw new DuplicateProjectKeyException(key);
         }
 
-        String id = UUID.randomUUID().toString();
-
         Project project = new Project(
-                id,
+                UUID.randomUUID().toString(),
                 request.getName(),
-                request.getKey()
+                key
         );
 
-        store.put(id, project);
-        keyToId.put(key, id);
-
+        projectRepository.save(project);
         return toResponse(project);
     }
 
     public ProjectResponse getById(String id) {
-        Project project = store.get(id);
-        if (project == null) {
-            throw new NoSuchElementException("Project not found: " + id);
-        }
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Project not found: " + id));
         return toResponse(project);
     }
 
     public List<ProjectResponse> getAll() {
-        return store.values().stream()
+        return projectRepository.findAll().stream()
                 .map(this::toResponse)
                 .toList();
     }
 
     public void delete(String id) {
-        Project removed = store.remove(id);
-        if (removed == null) {
+        boolean deleted = projectRepository.deleteById(id);
+        if (!deleted) {
             throw new NoSuchElementException("Project not found: " + id);
         }
     }
 
     public ProjectResponse update(String id, UpdateProjectRequest request) {
-        Project project = store.get(id);
-        if (project == null) {
-            throw new NoSuchElementException("Project not found: " + id);
-        }
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Project not found: " + id));
 
         if (request.getName() != null) {
             project.setName(request.getName());
         }
 
+        projectRepository.save(project);
         return toResponse(project);
     }
 
