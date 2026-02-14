@@ -1,6 +1,7 @@
 package com.taskforge.task;
 
 import com.taskforge.project.model.Project;
+import com.taskforge.task.model.TaskStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,6 +19,10 @@ public class Task {
 
     @Column(nullable = false, length = 200)
     private String title;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private TaskStatus status;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)
