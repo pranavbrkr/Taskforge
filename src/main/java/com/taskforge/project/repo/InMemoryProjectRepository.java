@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Repository
 public class InMemoryProjectRepository implements ProjectRepository {
     private final Map<String, Project> store = new ConcurrentHashMap<>();
     private final Map<String, String> keyToId = new ConcurrentHashMap<>();
