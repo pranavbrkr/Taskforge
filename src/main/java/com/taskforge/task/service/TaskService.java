@@ -5,6 +5,7 @@ import com.taskforge.project.repo.JpaProjectRepository;
 import com.taskforge.task.Task;
 import com.taskforge.task.dto.CreateTaskRequest;
 import com.taskforge.task.dto.TaskResponse;
+import com.taskforge.task.dto.UpdateTaskRequest;
 import com.taskforge.task.repo.TaskRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,6 +60,48 @@ public class TaskService {
                         t.getProject().getKey()
                 ))
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public TaskResponse getById(String taskId) {
+        var task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new NoSuchElementException("Task not found: " + taskId));
+
+        return new TaskResponse(
+                task.getId(),
+                task.getTitle(),
+                task.getStatus(),
+                task.getProject().getKey()
+        );
+    }
+
+    @Transactional
+    public TaskResponse update(String taskId, UpdateTaskRequest request) {
+        var task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new NoSuchElementException("Task not found: " + taskId));
+
+        if (request.getTitle() != null)
+            task.setTitle(request.getTitle());
+
+        if (request.getStatus() != null)
+            task.setStatus(request.getStatus());
+
+        return new TaskResponse(
+                task.getId(),
+                task.getTitle(),
+                task.getStatus(),
+                task.getProject().getKey()
+        );
+    }
+
+    @Transactional
+    public void delete(String taskId) {
+        boolean exists = taskRepository.existsById(taskId);
+
+        if (!exists)
+            throw new NoSuchElementException("Task not found: " + taskId);
+
+        taskRepository.deleteById(taskId);
     }
 
     public List<Task> debugEntities(String projectId) {
