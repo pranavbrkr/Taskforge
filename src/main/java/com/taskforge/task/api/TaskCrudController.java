@@ -1,5 +1,6 @@
 package com.taskforge.task.api;
 
+import com.taskforge.task.dto.MoveTaskRequest;
 import com.taskforge.task.dto.TaskResponse;
 import com.taskforge.task.dto.UpdateTaskRequest;
 import com.taskforge.task.service.TaskService;
@@ -29,5 +30,10 @@ public class TaskCrudController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable String taskId) {
         taskService.delete(taskId);
+    }
+
+    @PostMapping("/{taskId}/move")
+    public TaskResponse move(@PathVariable String taskId, @Valid @RequestBody MoveTaskRequest request) {
+        return taskService.moveTask(taskId, request);
     }
 }
