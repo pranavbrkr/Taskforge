@@ -23,7 +23,8 @@ public class TaskService {
         this.projectRepository = projectRepository;
     }
 
-    public Task create(String projectId, CreateTaskRequest request) {
+    @Transactional
+    public TaskResponse create(String projectId, CreateTaskRequest request) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new NoSuchElementException("Project not found: " + projectId));
 
@@ -34,7 +35,14 @@ public class TaskService {
                 project
         );
 
-        return taskRepository.save(task);
+        var saved =  taskRepository.save(task);
+
+        return new TaskResponse(
+                saved.getId(),
+                saved.getTitle(),
+                saved.getStatus(),
+                project.getKey()
+        );
     }
 
     @Transactional(readOnly = true)
@@ -43,8 +51,13 @@ public class TaskService {
             throw new NoSuchElementException("Project not found: " + projectId);
         }
 
-        return taskRepository.findByProjectId(projectId).stream()
-                .map(t -> new TaskResponse(t.getId(), t.getTitle(), t.getStatus(), t.getProject().getKey()))
+        return taskRepository.findByProjectIdWithProject(projectId).stream()
+                .map(t -> new TaskResponse(
+                        t.getId(),
+                        t.getTitle(),
+                        t.getStatus(),
+                        t.getProject().getKey()
+                ))
                 .toList();
     }
 

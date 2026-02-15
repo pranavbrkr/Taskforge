@@ -17,7 +17,7 @@ public class TaskController {
     private final TaskService taskService;
 
     @PostMapping
-    public Task create(@PathVariable String projectId, @Valid @RequestBody CreateTaskRequest request) {
+    public TaskResponse create(@PathVariable String projectId, @Valid @RequestBody CreateTaskRequest request) {
         return taskService.create(projectId, request);
     }
 
