@@ -12,6 +12,6 @@ public interface TaskRepository extends JpaRepository<Task, String> {
 
     long deleteByProjectId(String projectId);
 
-    @Query("select t from Task t join fetch t.project where t.project.id = :projectId")
+    @Query("select t from Task t join fetch t.project where t.project.id = :projectId order by t.createdAt desc")
     List<Task> findByProjectIdWithProject(@Param("projectId") String projectId);
 }
