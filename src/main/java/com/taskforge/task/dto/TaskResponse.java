@@ -10,4 +10,5 @@ public class TaskResponse {
     private String id;
     private String title;
     private TaskStatus status;
+    private String projectKey;
 }

@@ -25,4 +25,9 @@ public class TaskController {
     public List<TaskResponse> list(@PathVariable String projectId) {
         return taskService.listByProject(projectId);
     }
+
+    @GetMapping("/debug-entity")
+    public List<Task> debugEntity(@PathVariable String projectId) {
+        return taskService.debugEntities(projectId);
+    }
 }

@@ -7,6 +7,7 @@ import com.taskforge.task.dto.CreateTaskRequest;
 import com.taskforge.task.dto.TaskResponse;
 import com.taskforge.task.repo.TaskRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -36,13 +37,21 @@ public class TaskService {
         return taskRepository.save(task);
     }
 
+    @Transactional(readOnly = true)
     public List<TaskResponse> listByProject(String projectId) {
         if (!projectRepository.existsById(projectId)) {
             throw new NoSuchElementException("Project not found: " + projectId);
         }
 
         return taskRepository.findByProjectId(projectId).stream()
-                .map(t -> new TaskResponse(t.getId(), t.getTitle(), t.getStatus()))
+                .map(t -> new TaskResponse(t.getId(), t.getTitle(), t.getStatus(), t.getProject().getKey()))
                 .toList();
+    }
+
+    public List<Task> debugEntities(String projectId) {
+        if (!projectRepository.existsById(projectId)) {
+            throw new NoSuchElementException("Project not found: " + projectId);
+        }
+        return taskRepository.findByProjectId(projectId);
     }
 }
