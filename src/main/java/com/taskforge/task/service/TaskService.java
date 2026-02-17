@@ -5,11 +5,11 @@ import com.taskforge.audit.repo.AuditLogRepository;
 import com.taskforge.project.model.Project;
 import com.taskforge.project.repo.JpaProjectRepository;
 import com.taskforge.task.Task;
-import com.taskforge.task.dto.CreateTaskRequest;
-import com.taskforge.task.dto.MoveTaskRequest;
-import com.taskforge.task.dto.TaskResponse;
-import com.taskforge.task.dto.UpdateTaskRequest;
+import com.taskforge.task.dto.*;
+import com.taskforge.task.model.TaskStatus;
 import com.taskforge.task.repo.TaskRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -136,6 +136,25 @@ public class TaskService {
         auditLogRepository.save(log);
 
         return new TaskResponse(task.getId(), task.getTitle(), task.getStatus(), newProjectKey);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<TaskListRow> listByProjectPaged(String projectId, TaskStatus status, String q, Pageable pageable) {
+        if (!projectRepository.existsById(projectId)) {
+            throw new NoSuchElementException("Project not found: " + projectId);
+        }
+
+        Page<TaskListRow> page = taskRepository.findTaskRowsByProjectId(projectId, status, q, pageable);
+
+        return new PageResponse<>(
+                page.getContent(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages(),
+                page.hasNext(),
+                page.hasPrevious()
+        );
     }
 
     public List<Task> debugEntities(String projectId) {
